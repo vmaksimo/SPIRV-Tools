@@ -39,7 +39,9 @@ spv_result_t ValidateUniqueness(ValidationState_t& _, const Instruction* inst) {
   const auto opcode = inst->opcode();
   if (opcode != spv::Op::OpTypeArray && opcode != spv::Op::OpTypeRuntimeArray &&
       opcode != spv::Op::OpTypeNodePayloadArrayAMDX &&
-      opcode != spv::Op::OpTypeStruct && opcode != spv::Op::OpTypePointer &&
+      opcode != spv::Op::OpTypeStruct &&
+      opcode != spv::Op::OpTypeStructContinuedINTEL &&
+      opcode != spv::Op::OpTypePointer &&
       opcode != spv::Op::OpTypeUntypedPointerKHR &&
       !_.RegisterUniqueTypeDeclaration(inst)) {
     return _.diag(SPV_ERROR_INVALID_DATA, inst)

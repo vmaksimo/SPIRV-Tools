@@ -124,6 +124,14 @@ void UpdateImmediateDominators(
 /// @param[in] block The dominators of this block will be printed
 void printDominatorList(BasicBlock& block);
 
+// Go through the next instructions and add the number of operands to the
+// total_members in case instruction is continued (introduced by
+// SPV_INTEL_long_composites extension).
+void CountMembersInContinuedInstructions(
+    std::vector<Instruction>::const_iterator inst_iter,
+    std::vector<Instruction>::const_iterator end_iter, spv::Op continued_opcode,
+    long unsigned int& total_members);
+
 /// Performs logical layout validation as described in section 2.4 of the SPIR-V
 /// spec.
 spv_result_t ModuleLayoutPass(ValidationState_t& _, const Instruction* inst);

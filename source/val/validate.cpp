@@ -415,6 +415,18 @@ spv_result_t ValidateBinaryAndKeepValidationState(
       hijack_context, words, num_words, pDiagnostic, vstate->get());
 }
 
+void CountMembersInContinuedInstructions(
+    std::vector<Instruction>::const_iterator inst_iter,
+    std::vector<Instruction>::const_iterator end_iter, spv::Op continued_opcode,
+    long unsigned int& total_members) {
+  // Iterate next and add the number of operands to the total_members in
+  // case instruction is OpCompositeConstructContinuedINTEL
+  for (auto iter = inst_iter + 1; iter != end_iter; ++iter) {
+    if (iter->opcode() != continued_opcode) break;
+    total_members += iter->operands().size();
+  }
+}
+
 }  // namespace val
 }  // namespace spvtools
 

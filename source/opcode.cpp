@@ -247,6 +247,7 @@ int32_t spvOpcodeIsSpecConstant(const spv::Op opcode) {
     case spv::Op::OpSpecConstantFalse:
     case spv::Op::OpSpecConstant:
     case spv::Op::OpSpecConstantComposite:
+    case spv::Op::OpSpecConstantCompositeContinuedINTEL:
     case spv::Op::OpSpecConstantCompositeReplicateEXT:
     case spv::Op::OpSpecConstantOp:
       return true;
@@ -261,6 +262,7 @@ int32_t spvOpcodeIsConstant(const spv::Op opcode) {
     case spv::Op::OpConstantFalse:
     case spv::Op::OpConstant:
     case spv::Op::OpConstantComposite:
+    case spv::Op::OpConstantCompositeContinuedINTEL:
     case spv::Op::OpConstantCompositeReplicateEXT:
     case spv::Op::OpConstantSampler:
     case spv::Op::OpConstantNull:
@@ -270,6 +272,7 @@ int32_t spvOpcodeIsConstant(const spv::Op opcode) {
     case spv::Op::OpSpecConstantFalse:
     case spv::Op::OpSpecConstant:
     case spv::Op::OpSpecConstantComposite:
+    case spv::Op::OpSpecConstantCompositeContinuedINTEL:
     case spv::Op::OpSpecConstantCompositeReplicateEXT:
     case spv::Op::OpSpecConstantOp:
     case spv::Op::OpSpecConstantStringAMDX:
@@ -300,6 +303,7 @@ int32_t spvOpcodeIsComposite(const spv::Op opcode) {
     case spv::Op::OpTypeMatrix:
     case spv::Op::OpTypeArray:
     case spv::Op::OpTypeStruct:
+    case spv::Op::OpTypeStructContinuedINTEL:
     case spv::Op::OpTypeRuntimeArray:
     case spv::Op::OpTypeCooperativeMatrixNV:
     case spv::Op::OpTypeCooperativeMatrixKHR:
@@ -391,6 +395,7 @@ int32_t spvOpcodeGeneratesType(spv::Op op) {
     case spv::Op::OpTypeNodePayloadArrayAMDX:
     case spv::Op::OpTypeTensorLayoutNV:
     case spv::Op::OpTypeTensorViewNV:
+    case spv::Op::OpTypeStructContinuedINTEL:
       return true;
     default:
       // In particular, OpTypeForwardPointer does not generate a type,

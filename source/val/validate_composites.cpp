@@ -217,6 +217,14 @@ spv_result_t ValidateVectorInsertDyanmic(ValidationState_t& _,
 spv_result_t ValidateCompositeConstruct(ValidationState_t& _,
                                         const Instruction* inst) {
   const uint32_t num_operands = static_cast<uint32_t>(inst->operands().size());
+  long unsigned int num_constituents = inst->operands().size() - 2;
+
+  CountMembersInContinuedInstructions(
+      find(_.ordered_instructions().begin(), _.ordered_instructions().end(),
+           *inst),
+      _.ordered_instructions().end(),
+      spv::Op::OpCompositeConstructContinuedINTEL, num_constituents);
+
   const uint32_t result_type = inst->type_id();
   const spv::Op result_opcode = _.GetIdOpcode(result_type);
   switch (result_opcode) {
@@ -334,10 +342,21 @@ spv_result_t ValidateCompositeConstruct(ValidationState_t& _,
       assert(struct_inst);
       assert(struct_inst->opcode() == spv::Op::OpTypeStruct);
 
-      if (struct_inst->operands().size() + 1 != num_operands) {
+      // Count the total number of members, including those in
+      // OpTypeStructContinuedINTEL
+      size_t total_members = struct_inst->operands().size() - 1;
+      CountMembersInContinuedInstructions(
+          find(_.ordered_instructions().begin(), _.ordered_instructions().end(),
+               *struct_inst),
+          _.ordered_instructions().end(), spv::Op::OpTypeStructContinuedINTEL,
+          total_members);
+
+      if (total_members != num_constituents) {
         return _.diag(SPV_ERROR_INVALID_DATA, inst)
-               << "Expected total number of Constituents to be equal "
-               << "to the number of members of Result Type struct";
+               << "Expected total number of Constituents (" << total_members
+               << ") to be equal to the number of members of Result Type "
+                  "struct ("
+               << num_constituents << ")";
       }
 
       for (uint32_t operand_index = 2; operand_index < num_operands;

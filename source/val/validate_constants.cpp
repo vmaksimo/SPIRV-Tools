@@ -44,7 +44,14 @@ spv_result_t ValidateConstantComposite(ValidationState_t& _,
            << _.getIdName(inst->type_id()) << " is not a composite type.";
   }
 
-  const auto constituent_count = inst->words().size() - 3;
+  auto constituent_count = inst->words().size() - 3;
+  spv::Op continued_oc = inst->opcode() == spv::Op::OpConstantComposite
+                             ? spv::Op::OpConstantCompositeContinuedINTEL
+                             : spv::Op::OpSpecConstantCompositeContinuedINTEL;
+  CountMembersInContinuedInstructions(
+      find(_.ordered_instructions().begin(), _.ordered_instructions().end(),
+           *inst),
+      _.ordered_instructions().end(), continued_oc, constituent_count);
   switch (result_type->opcode()) {
     case spv::Op::OpTypeVector:
     case spv::Op::OpTypeCooperativeVectorNV: {
@@ -181,10 +188,11 @@ spv_result_t ValidateConstantComposite(ValidationState_t& _,
       std::tie(is_int32, is_const, value) = _.EvalInt32IfConst(length->id());
       if (is_int32 && is_const && value != constituent_count) {
         return _.diag(SPV_ERROR_INVALID_ID, inst)
-               << opcode_name
-               << " Constituent count does not match "
+               << opcode_name << " Constituent count (" << constituent_count
+               << ") does not match "
                   "Result Type <id> "
-               << _.getIdName(result_type->id()) << "s array length.";
+               << _.getIdName(result_type->id()) << "s array length (" << value
+               << ").";
       }
       for (size_t constituent_index = 2;
            constituent_index < inst->operands().size(); constituent_index++) {
@@ -213,13 +221,19 @@ spv_result_t ValidateConstantComposite(ValidationState_t& _,
       }
     } break;
     case spv::Op::OpTypeStruct: {
-      const auto member_count = result_type->words().size() - 2;
+      auto member_count = result_type->words().size() - 1;
+      CountMembersInContinuedInstructions(
+          find(_.ordered_instructions().begin(), _.ordered_instructions().end(),
+               *result_type),
+          _.ordered_instructions().end(), spv::Op::OpTypeStructContinuedINTEL,
+          member_count);
       if (member_count != constituent_count) {
         return _.diag(SPV_ERROR_INVALID_ID, inst)
                << opcode_name << " Constituent <id> "
-               << _.getIdName(inst->type_id())
-               << " count does not match Result Type <id> "
-               << _.getIdName(result_type->id()) << "s struct member count.";
+               << _.getIdName(inst->type_id()) << " count ("
+               << constituent_count << ")does not match Result Type <id> "
+               << _.getIdName(result_type->id()) << "s struct member count ("
+               << member_count << ").";
       }
       for (uint32_t constituent_index = 2, member_index = 1;
            constituent_index < inst->operands().size();
